@@ -1,12 +1,14 @@
 import java.io.File;
 import java.nio.file.Files;
-import java.nio.file.StandardOpenOption;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Stack;
 
 public class KMLParser {
 	public static void main(String[] args) throws Exception{
+		//Highest Vertex id
+		int maxId = 826;
 		//Unused IDs so far
 		boolean[] idInUse = new boolean[826];
 		//List of Vertices and Edges
@@ -136,7 +138,7 @@ public class KMLParser {
 		System.out.println(vertices);
 		System.out.println(edges);
 		System.out.print("Unused Vertices: ");
-		for(int i=0; i<826; i++) {
+		for(int i=0; i<maxId; i++) {
 			if (!idInUse[i]) {
 				System.out.print(i + " ");
 			}
@@ -149,7 +151,7 @@ public class KMLParser {
 			idWithEdge[edge.to()] = true;
 		}
 		int count = 0;
-		for (int i=0; i<826; i++) {
+		for (int i=0; i<maxId; i++) {
 			if (idWithEdge[i]) {
 				System.out.print(i + " ");
 				count++;
@@ -165,7 +167,8 @@ public class KMLParser {
 		for (DirectedEdge edge : edges) {
 			edgeList.append(edge + "\r\n");
 		}
-		Files.write((new File("D:\\Downloads\\edges")).toPath(), edgeList.toString().getBytes(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+		//Files.write((new File("D:\\Downloads\\edges")).toPath(), edgeList.toString().getBytes(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+		
 		//Write vertices that has edges
 		StringBuffer verticeList = new StringBuffer();
 		for (Vertex vertex : vertices) {
@@ -173,9 +176,26 @@ public class KMLParser {
 				verticeList.append(vertex + "\r\n");
 			}
 		}
-		Files.write((new File("D:\\Downloads\\vertex")).toPath(), verticeList.toString().getBytes(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+		//Files.write((new File("D:\\Downloads\\vertex")).toPath(), verticeList.toString().getBytes(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+		
 		//Calculate path using floyd-warshall algorithm
-		//Save the table
+		//Create the graph with 826 vertices (since we can't use individual ids
+		AdjMatrixEdgeWeightedDigraph graph = new AdjMatrixEdgeWeightedDigraph(maxId);
+		//Add edges
+		for (DirectedEdge edge : edges) {
+			graph.addEdge(edge);
+		}
+		//Run Floyd Warshall
+		FloydWarshall fw = new FloydWarshall(graph);
+		//Save the table (To be done later)
+
+		//Test cases
+		//Test 547 to 144 (PGPR to i3 Auditorium)
+		System.out.println("Distance: " + fw.dist(97,95));
+		Iterable<DirectedEdge> path = fw.path(97,95);
+		for (DirectedEdge edge : path) {
+			System.out.println(edge.from() + "->" + edge.to() + " (" + edge.weight() + ") " + edge.coordinates);
+		}
 	}
 	
 	/*
@@ -185,13 +205,13 @@ public class KMLParser {
      * @returns Distance in Meters
      */
     public static double estimateDistance(double lat1, double lon1, double lat2, double lon2) {
-        final int R = 6371; // Radius of the earth
+        final int R = 6378137; // Radius of the earth
 
-        Double latDistance = Math.toRadians(lat2 - lat1);
-        Double lonDistance = Math.toRadians(lon2 - lon1);
+        Double latDistance = lat2 - lat1;
+        Double lonDistance = lon2 - lon1;
         Double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2) + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
         Double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        double distance = R * c * 1000; // convert to meters
+        double distance = R * c; // convert to meters
 
         return Math.sqrt(distance);
     }

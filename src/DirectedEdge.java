@@ -27,7 +27,7 @@ public class DirectedEdge {
     private final int from;
     private final int to;
     private final double weight;
-    private final LinkedList<GeoCoordinate> coordinates;
+    public final LinkedList<GeoCoordinate> coordinates;
     
     //add
     public LinkedList<String> description;
