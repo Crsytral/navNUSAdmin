@@ -1,3 +1,8 @@
+import java.io.File;
+import java.io.IOException;
+import java.io.Serializable;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.util.LinkedList;
 
 /******************************************************************************
@@ -39,8 +44,8 @@ import java.util.LinkedList;
  *  @author Robert Sedgewick
  *  @author Kevin Wayne
  */
-public class FloydWarshall {
-    private boolean hasNegativeCycle;  // is there a negative cycle?
+public class FloydWarshall implements Serializable {
+	private boolean hasNegativeCycle;  // is there a negative cycle?
     private double[][] distTo;  // distTo[v][w] = length of shortest v->w path
     private DirectedEdge[][] edgeTo;  // edgeTo[v][w] = last edge on shortest v->w path
 
@@ -168,24 +173,20 @@ public class FloydWarshall {
         }
         return path;
     }
-
-    // check optimality conditions
-    private boolean check(EdgeWeightedDigraph G, int s) {
-        // no negative cycle
-        if (!hasNegativeCycle()) {
-            for (int v = 0; v < G.V(); v++) {
-                for (DirectedEdge e : G.adj(v)) {
-                    int w = e.to();
-                    for (int i = 0; i < G.V(); i++) {
-                        if (distTo[i][w] > distTo[i][v] + e.weight()) {
-                            System.err.println("edge " + e + " is eligible");
-                            return false;
-                        }
-                    }
-                }
-            }
-        }
-        return true;
+    
+    public void saveDistToTable(String path) {
+    	StringBuffer data = new StringBuffer();
+    	for (int row=0; row<distTo.length; row++) {
+    		for (int column=0; column<distTo.length; column++) {
+    			data.append(distTo[row][column] + " ");
+    		}
+    		data.append("\r\n");
+    	}
+		try {
+			Files.write((new File(path)).toPath(), data.toString().getBytes(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
     }
 
 }

@@ -1,4 +1,10 @@
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.nio.file.Files;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -162,21 +168,24 @@ public class KMLParser {
 		System.out.println("Total Edges: " + edges.size());
 		
 		//Write out data for reading
-		//Write edges
+		/* Unused since we are using serializable, also not needed
 		StringBuffer edgeList = new StringBuffer();
 		for (DirectedEdge edge : edges) {
 			edgeList.append(edge + "\r\n");
 		}
-		//Files.write((new File("D:\\Downloads\\edges")).toPath(), edgeList.toString().getBytes(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+		Files.write((new File("D:\\Downloads\\edges")).toPath(), edgeList.toString().getBytes(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+		*/
 		
 		//Write vertices that has edges
+		/* Unused since we are using serializable
 		StringBuffer verticeList = new StringBuffer();
 		for (Vertex vertex : vertices) {
 			if (idWithEdge[vertex.id]) {
 				verticeList.append(vertex + "\r\n");
 			}
 		}
-		//Files.write((new File("D:\\Downloads\\vertex")).toPath(), verticeList.toString().getBytes(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+		Files.write((new File("D:\\Downloads\\vertex")).toPath(), verticeList.toString().getBytes(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+		*/
 		
 		//Calculate path using floyd-warshall algorithm
 		//Create the graph with 826 vertices (since we can't use individual ids
@@ -185,17 +194,77 @@ public class KMLParser {
 		for (DirectedEdge edge : edges) {
 			graph.addEdge(edge);
 		}
-		//Run Floyd Warshall
+		//Create Floyd Warshall object
 		FloydWarshall fw = new FloydWarshall(graph);
-		//Save the table (To be done later)
-
-		//Test cases
-		//Test 547 to 144 (PGPR to i3 Auditorium)
-		System.out.println("Distance: " + fw.dist(97,95));
-		Iterable<DirectedEdge> path = fw.path(97,95);
-		for (DirectedEdge edge : path) {
-			System.out.println(edge.from() + "->" + edge.to() + " (" + edge.weight() + ") " + edge.coordinates);
+		
+		//Save data for android
+		//writeSerializable(fw, "D:\\Downloads\\floydwarshall");
+		//We shall only save vertices with edges
+		LinkedList<Vertex> verticesWithEdges = new LinkedList<Vertex>();
+		for (Vertex vertex : vertices) {
+			if (idWithEdge[vertex.id]) {
+				verticesWithEdges.add(vertex);
+			}
 		}
+		//writeSerializable(verticesWithEdges, "D:\\Downloads\\vertices");
+		
+		/************************************************************
+		 * 															*
+		 * 															* 
+		 * 															*
+		 * 						Test Cases							*
+		 * 															*
+		 * 															*
+		 * 															*
+		 ************************************************************/
+		//Check if reading works
+		//vertices = (LinkedList<Vertex>) readSerializable("D:\\Downloads\\vertices");
+		//fw = (FloydWarshall) readSerializable("D:\\Downloads\\floydwarshall");
+ 		
+		//Test path
+		int id1 = 27;
+		int id2 = 694;
+ 		System.out.println("Distance: " + fw.dist(id1, id2));
+ 		Iterable<DirectedEdge> path = fw.path(id1, id2);
+ 		for (DirectedEdge edge : path) {
+ 			System.out.println(edge.from() + "->" + edge.to() + " (" + edge.weight() + ")");
+ 		}
+	}
+	
+	/*
+     * Write an object to a serializable file
+     */
+	public static void writeSerializable(Serializable object, String path) {
+		try {
+			FileOutputStream fileOut = new FileOutputStream(path);
+			ObjectOutputStream out = new ObjectOutputStream(fileOut);
+			out.writeObject(object);
+			out.close();
+			fileOut.close();
+		} catch(IOException i) {
+			i.printStackTrace();
+		}
+	}
+	
+	/*
+     * Read a serializable file and convert to an object
+     *
+     * @returns The serializable object, remember to cast it after the return
+     */
+	public static Serializable readSerializable(String path) {
+		try {
+			FileInputStream fileIn = new FileInputStream(path);
+			ObjectInputStream in = new ObjectInputStream(fileIn);
+			Serializable serializable = (Serializable) in.readObject();
+			in.close();
+			fileIn.close();
+			return serializable;
+		} catch(IOException i) {
+			i.printStackTrace();
+		} catch(ClassNotFoundException c) {
+			c.printStackTrace();
+		}
+		return null;
 	}
 	
 	/*

@@ -1,5 +1,6 @@
+import java.io.Serializable;
 
-public class GeoCoordinate {
+public class GeoCoordinate implements Serializable {
 	public double latitude;
 	public double longitude;
 	

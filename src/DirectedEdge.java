@@ -1,3 +1,5 @@
+import java.io.Serializable;
+import java.util.Arrays;
 import java.util.LinkedList;
 
 /******************************************************************************
@@ -23,7 +25,7 @@ import java.util.LinkedList;
  *  @author Kevin Wayne
  */
 
-public class DirectedEdge {
+public class DirectedEdge implements Serializable {
     private final int from;
     private final int to;
     private final double weight;
@@ -51,6 +53,24 @@ public class DirectedEdge {
         this.weight = weight;
         this.description = description;
         this.coordinates = coordinates;
+    }
+    
+    public DirectedEdge(String dataString) {
+    	String[] data = dataString.split(";");
+    	from = Integer.parseInt(data[0]);
+    	to = Integer.parseInt(data[1]);;
+    	weight = Double.parseDouble(data[2]);
+    	description = new LinkedList<String>(); 
+    	for (String desc : data[3].split("--next--")) {
+    		description.add(desc);
+    	}
+    	coordinates = new LinkedList<GeoCoordinate>();
+    	for (String geoData : data[4].split("--next--")) {
+    		String[] geo = geoData.split(",");
+    		double lat = Double.parseDouble(geo[0]);
+    		double lon = Double.parseDouble(geo[1]);
+    		coordinates.add(new GeoCoordinate(lat, lon));
+    	}
     }
 
     /**
