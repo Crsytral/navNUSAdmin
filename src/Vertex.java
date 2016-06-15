@@ -11,6 +11,7 @@ public class Vertex {
 	}
 	
 	public String toString() {
-		return id + " : " + name + " (" + coordinate.latitude + ", " + coordinate.longitude + ")";
+		//return id + " : " + name + " (" + coordinate.latitude + ", " + coordinate.longitude + ")";
+		return id + ";" + name + ";" + coordinate.latitude + ";" + coordinate.longitude;
 	}
 }

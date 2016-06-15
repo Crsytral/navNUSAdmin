@@ -1,5 +1,6 @@
 import java.io.File;
 import java.nio.file.Files;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -19,8 +20,16 @@ public class KMLParser {
 				//Get the list of coordinates for the track (array since track can have multiple coordinates)
 				int j = i;
 				while (!data.get(j).contains("<coordinates>")) j++;
+				//Format of each entry long,lat
 				String[] coordinateList = data.get(j).replace("<coordinates>", "").replace("</coordinates>", "").trim().split(" ");
+				LinkedList<GeoCoordinate> coordinates = new LinkedList<GeoCoordinate>();
 				
+				for (String coordinate : coordinateList) {
+					double lon = Double.parseDouble(coordinate.split(",")[0]);
+					double lat = Double.parseDouble(coordinate.split(",")[1]);
+					coordinates.add(new GeoCoordinate(lat, lon));
+				}
+						
 				//Extract vertices id, end points of the edges
 				boolean hasName = true;
 				j = i;
@@ -69,17 +78,23 @@ public class KMLParser {
 								hasOppositeTag = false;
 								break;
 							}
-							description2.addFirst(data.get(j).replace("</description>", "").replace("<description>", "").trim());
+							String description = data.get(j).replace("</description>", "").replace("<description>", "").trim();
+							if (!description.equals("")) {
+								description2.addFirst(description);
+							}
+							
 							j--;
 						}
 						
 						if (hasOppositeTag) {
-							j--; //remove the --opposite-- tag
 							while (!data.get(j).contains("<description>")) {
-								description1.addFirst(data.get(j).trim());
+								String description = data.get(j).replace("</description>", "").replace("<description>", "").replace("--opposite--", "").replace("--Opposite--", "").trim();
+								if (!description.equals("")) {
+									description1.addFirst(description);
+								}
 								j--;
 							}
-							description1.addFirst(data.get(j).replace("</description>", "").replace("<description>", "").trim());
+
 						}
 					}
 					
@@ -94,8 +109,9 @@ public class KMLParser {
 						prevLat = lat;
 						prevLon = lon;
 					}
-					edges.add(new DirectedEdge(Integer.parseInt(idList[0].trim()), Integer.parseInt(idList[1].trim()), distance, description1));
-					edges.add(new DirectedEdge(Integer.parseInt(idList[1].trim()), Integer.parseInt(idList[0].trim()), distance, description2));
+					edges.add(new DirectedEdge(Integer.parseInt(idList[0].trim()), Integer.parseInt(idList[1].trim()), distance, description1, coordinates));
+					Collections.reverse(coordinates);
+					edges.add(new DirectedEdge(Integer.parseInt(idList[1].trim()), Integer.parseInt(idList[0].trim()), distance, description2, coordinates));
 				}
 			} else if (line.equals("\t\t\t<Point>")) {
 				//Extract the id and name
@@ -144,6 +160,7 @@ public class KMLParser {
 		
 		//Write out data for reading
 		//Write edges
+		//Files.write(path, lines, options)
 		//Write vertices that has edges
 		//Calculate path using floyd-warshall algorithm
 		//Save the table

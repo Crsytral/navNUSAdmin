@@ -24,9 +24,10 @@ import java.util.LinkedList;
  */
 
 public class DirectedEdge {
-    private final int v;
-    private final int w;
+    private final int from;
+    private final int to;
     private final double weight;
+    private final LinkedList<GeoCoordinate> coordinates;
     
     //add
     public LinkedList<String> description;
@@ -41,14 +42,15 @@ public class DirectedEdge {
      *    is a negative integer
      * @throws IllegalArgumentException if <tt>weight</tt> is <tt>NaN</tt>
      */
-    public DirectedEdge(int v, int w, double weight, LinkedList<String> description) {
+    public DirectedEdge(int v, int w, double weight, LinkedList<String> description, LinkedList<GeoCoordinate> coordinates) {
         if (v < 0) throw new IndexOutOfBoundsException("Vertex names must be nonnegative integers");
         if (w < 0) throw new IndexOutOfBoundsException("Vertex names must be nonnegative integers");
         if (Double.isNaN(weight)) throw new IllegalArgumentException("Weight is NaN");
-        this.v = v;
-        this.w = w;
+        this.from = v;
+        this.to = w;
         this.weight = weight;
         this.description = description;
+        this.coordinates = coordinates;
     }
 
     /**
@@ -56,7 +58,7 @@ public class DirectedEdge {
      * @return the tail vertex of the directed edge
      */
     public int from() {
-        return v;
+        return from;
     }
 
     /**
@@ -64,7 +66,7 @@ public class DirectedEdge {
      * @return the head vertex of the directed edge
      */
     public int to() {
-        return w;
+        return to;
     }
 
     /**
@@ -80,7 +82,29 @@ public class DirectedEdge {
      * @return a string representation of the directed edge
      */
     public String toString() {
-        return v + "->" + w + " " + String.format("(%.2f)", weight) + description;
+        //Description & Coordinates are list, have to manually split them up for output
+    	//Description
+    	StringBuffer descriptionList = new StringBuffer();
+    	for (String description : description) {
+    		descriptionList.append(description);
+    		descriptionList.append("--next--");
+    	}
+    	if (descriptionList.lastIndexOf("--next--") == descriptionList.length()-8) {
+    		descriptionList.delete(descriptionList.length()-8, descriptionList.length());
+    	}
+
+    	//Coordinates
+    	StringBuffer coordinateList = new StringBuffer();
+    	for (GeoCoordinate coordinate : coordinates) {
+    		coordinateList.append(coordinate);
+    		coordinateList.append("--next--");
+    	}
+    	if (coordinateList.lastIndexOf("--next--") == coordinateList.length()-8) {
+    		coordinateList.delete(coordinateList.length()-8, coordinateList.length());
+    	}
+    	
+    	//return from + "->" + to + " " + String.format("(%.2f)", weight) + description + " " + coordinates;
+        return from + ";" + to + ";" + String.format("%.2f", weight) + ";" + descriptionList + ";" + coordinateList;
     }
 
 }
