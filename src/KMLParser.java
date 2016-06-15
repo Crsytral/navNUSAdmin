@@ -1,5 +1,6 @@
 import java.io.File;
 import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -160,8 +161,19 @@ public class KMLParser {
 		
 		//Write out data for reading
 		//Write edges
-		//Files.write(path, lines, options)
+		StringBuffer edgeList = new StringBuffer();
+		for (DirectedEdge edge : edges) {
+			edgeList.append(edge + "\r\n");
+		}
+		Files.write((new File("D:\\Downloads\\edges")).toPath(), edgeList.toString().getBytes(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
 		//Write vertices that has edges
+		StringBuffer verticeList = new StringBuffer();
+		for (Vertex vertex : vertices) {
+			if (idWithEdge[vertex.id]) {
+				verticeList.append(vertex + "\r\n");
+			}
+		}
+		Files.write((new File("D:\\Downloads\\vertex")).toPath(), verticeList.toString().getBytes(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
 		//Calculate path using floyd-warshall algorithm
 		//Save the table
 	}
