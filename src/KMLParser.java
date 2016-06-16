@@ -1,3 +1,5 @@
+import generated.Kml;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -9,7 +11,9 @@ import java.nio.file.Files;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Stack;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Unmarshaller;
 
 public class KMLParser {
 	public static void main(String[] args) throws Exception{
@@ -198,7 +202,7 @@ public class KMLParser {
 		FloydWarshall fw = new FloydWarshall(graph);
 		
 		//Save data for android
-		//writeSerializable(fw, "D:\\Downloads\\floydwarshall");
+		writeSerializable(fw, "D:\\Downloads\\floydwarshall");
 		//We shall only save vertices with edges
 		LinkedList<Vertex> verticesWithEdges = new LinkedList<Vertex>();
 		for (Vertex vertex : vertices) {
@@ -206,7 +210,7 @@ public class KMLParser {
 				verticesWithEdges.add(vertex);
 			}
 		}
-		//writeSerializable(verticesWithEdges, "D:\\Downloads\\vertices");
+		writeSerializable(verticesWithEdges, "D:\\Downloads\\vertices");
 		
 		/************************************************************
 		 * 															*
@@ -220,7 +224,19 @@ public class KMLParser {
 		//Check if reading works
 		//vertices = (LinkedList<Vertex>) readSerializable("D:\\Downloads\\vertices");
 		//fw = (FloydWarshall) readSerializable("D:\\Downloads\\floydwarshall");
- 		
+		
+		/*Kml kml = new Kml();
+		kml.
+		Kml.Document.Placemark test = (Kml.Document.Placemark)(kml.getDocument().getPlacemarkOrStyle().get(0));
+		File file = new File("D:\\Downloads\\features.kml");
+		JAXBContext jaxbContext = JAXBContext.newInstance(Kml.class);
+		
+
+		Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+		Kml customer = (Kml) jaxbUnmarshaller.unmarshal(file);
+		System.out.println(customer);
+		*/
+		
 		//Test path
 		int id1 = 27;
 		int id2 = 694;

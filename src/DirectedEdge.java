@@ -1,5 +1,4 @@
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.LinkedList;
 
 /******************************************************************************
@@ -105,7 +104,7 @@ public class DirectedEdge implements Serializable {
         //Description & Coordinates are list, have to manually split them up for output
     	//Description
     	StringBuffer descriptionList = new StringBuffer();
-    	for (String description : description) {
+    	for (String description : this.description) {
     		descriptionList.append(description);
     		descriptionList.append("--next--");
     	}
