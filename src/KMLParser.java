@@ -1,19 +1,20 @@
-import generated.Kml;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Unmarshaller;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 
 public class KMLParser {
 	public static void main(String[] args) throws Exception{
@@ -202,7 +203,7 @@ public class KMLParser {
 		FloydWarshall fw = new FloydWarshall(graph);
 		
 		//Save data for android
-		writeSerializable(fw, "D:\\Downloads\\floydwarshall");
+		toJson(fw, "D:\\Downloads\\floydwarshall");
 		//We shall only save vertices with edges
 		LinkedList<Vertex> verticesWithEdges = new LinkedList<Vertex>();
 		for (Vertex vertex : vertices) {
@@ -210,7 +211,7 @@ public class KMLParser {
 				verticesWithEdges.add(vertex);
 			}
 		}
-		writeSerializable(verticesWithEdges, "D:\\Downloads\\vertices");
+		toJson(verticesWithEdges, "D:\\Downloads\\vertices");
 		
 		/************************************************************
 		 * 															*
@@ -237,6 +238,7 @@ public class KMLParser {
 		System.out.println(customer);
 		*/
 		
+		/*
 		//Test path
 		int id1 = 27;
 		int id2 = 694;
@@ -245,40 +247,42 @@ public class KMLParser {
  		for (DirectedEdge edge : path) {
  			System.out.println(edge.from() + "->" + edge.to() + " (" + edge.weight() + ")");
  		}
+ 		*/
 	}
 	
-	/*
-     * Write an object to a serializable file
-     */
-	public static void writeSerializable(Serializable object, String path) {
+	public static void toJson(Object object, String path) {
 		try {
 			FileOutputStream fileOut = new FileOutputStream(path);
-			ObjectOutputStream out = new ObjectOutputStream(fileOut);
-			out.writeObject(object);
+			OutputStreamWriter out = new OutputStreamWriter(fileOut);
+			Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
+			gson.toJson(object, out);
 			out.close();
 			fileOut.close();
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static LinkedList<Vertex> readVertice(String path) {
+		try {
+			String data = new String(Files.readAllBytes(Paths.get(path)));
+			Gson gson = new Gson();
+			LinkedList<Vertex> object = gson.fromJson(data, new TypeToken<Collection<Vertex>>(){}.getType());
+			return object;
 		} catch(IOException i) {
 			i.printStackTrace();
 		}
+		return null;
 	}
 	
-	/*
-     * Read a serializable file and convert to an object
-     *
-     * @returns The serializable object, remember to cast it after the return
-     */
-	public static Serializable readSerializable(String path) {
+	public static FloydWarshall readFW(String path) {
 		try {
-			FileInputStream fileIn = new FileInputStream(path);
-			ObjectInputStream in = new ObjectInputStream(fileIn);
-			Serializable serializable = (Serializable) in.readObject();
-			in.close();
-			fileIn.close();
-			return serializable;
+			String data = new String(Files.readAllBytes(Paths.get(path)));
+			Gson gson = new Gson();
+			FloydWarshall object = gson.fromJson(data, FloydWarshall.class);
+			return object;
 		} catch(IOException i) {
 			i.printStackTrace();
-		} catch(ClassNotFoundException c) {
-			c.printStackTrace();
 		}
 		return null;
 	}
