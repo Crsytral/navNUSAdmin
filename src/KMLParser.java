@@ -201,6 +201,7 @@ public class KMLParser {
 		}
 		//Create Floyd Warshall object
 		FloydWarshall fw = new FloydWarshall(graph);
+		//FloydWarshallOutput fwo = new FloydWarshallOutput(fw);
 		
 		//Save data for android
 		toJson(fw, "D:\\Downloads\\floydwarshall");
@@ -251,7 +252,7 @@ public class KMLParser {
 	}
 	
 	public static void toJson(Object object, String path) {
-		try {
+		try {		
 			FileOutputStream fileOut = new FileOutputStream(path);
 			OutputStreamWriter out = new OutputStreamWriter(fileOut);
 			Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
