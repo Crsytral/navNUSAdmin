@@ -1,5 +1,8 @@
+package edu.princeton.cs.algs4;
 import java.io.Serializable;
 import java.util.LinkedList;
+
+import com.navnus.entity.GeoCoordinate;
 
 /******************************************************************************
  *  Compilation:  javac DirectedEdge.java

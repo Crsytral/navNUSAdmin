@@ -1,3 +1,4 @@
+package com.navnus.entity;
 import java.io.Serializable;
 
 public class Vertex implements Comparable {

@@ -1,3 +1,4 @@
+package edu.princeton.cs.algs4;
 /******************************************************************************
  *  Compilation:  javac AdjMatrixEdgeWeightedDigraph.java
  *  Execution:    java AdjMatrixEdgeWeightedDigraph V E
