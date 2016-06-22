@@ -160,7 +160,7 @@ public class FloydWarshall implements Serializable {
      * as an iterable of edges, and <tt>null</tt> if no such path
      * @throws UnsupportedOperationException if there is a negative cost cycle
      */
-    public Iterable<DirectedEdge> path(int s, int t) {
+    public LinkedList<DirectedEdge> path(int s, int t) {
         if (hasNegativeCycle())
             throw new UnsupportedOperationException("Negative cost cycle exists");
         if (!hasPath(s, t)) return null;
