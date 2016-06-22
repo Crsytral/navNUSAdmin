@@ -1,16 +1,16 @@
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.OutputStreamWriter;
-import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map.Entry;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -23,7 +23,7 @@ public class KMLParser {
 		//Unused IDs so far
 		boolean[] idInUse = new boolean[826];
 		//List of Vertices and Edges
-		LinkedList<Vertex> vertices = new LinkedList<Vertex>();
+		HashMap<Integer, Vertex> vertices = new HashMap<Integer, Vertex>(maxId);
 		LinkedList<DirectedEdge> edges = new LinkedList<DirectedEdge>();
 		
 		List<String> data = Files.readAllLines((new File("D:\\Downloads\\features.kml")).toPath());
@@ -141,7 +141,7 @@ public class KMLParser {
 				String latitude = data.get(j).replace("<coordinates>", "").replace("</coordinates>", "").trim().split(",")[1].trim();
 				
 				//System.out.println("Way Point " + id + ";" + name + ";" + latitude + ";" + longitude);
-				vertices.add(new Vertex(Integer.parseInt(id), name, new GeoCoordinate(Double.parseDouble(latitude), Double.parseDouble(longitude))));
+				vertices.put(Integer.parseInt(id), new Vertex(Integer.parseInt(id), name, new GeoCoordinate(Double.parseDouble(latitude), Double.parseDouble(longitude))));
 				idInUse[Integer.parseInt(id)] = true;
 			}
 		}
@@ -155,45 +155,14 @@ public class KMLParser {
 			}
 		}
 		System.out.println();
-		System.out.print("Vertices with edges: ");
-		boolean[] idWithEdge = new boolean[826];
+
 		for (DirectedEdge edge : edges) {
-			idWithEdge[edge.from()] = true;
-			idWithEdge[edge.to()] = true;
+			vertices.get(edge.from()).hasEdges = true;
+			vertices.get(edge.to()).hasEdges = true;
 		}
-		int count = 0;
-		for (int i=0; i<maxId; i++) {
-			if (idWithEdge[i]) {
-				System.out.print(i + " ");
-				count++;
-			}
-		}
-		System.out.println();
-		System.out.println("Total vertices with edges: " + count);
-		System.out.println("Total Edges: " + edges.size());
-		
-		//Write out data for reading
-		/* Unused since we are using serializable, also not needed
-		StringBuffer edgeList = new StringBuffer();
-		for (DirectedEdge edge : edges) {
-			edgeList.append(edge + "\r\n");
-		}
-		Files.write((new File("D:\\Downloads\\edges")).toPath(), edgeList.toString().getBytes(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-		*/
-		
-		//Write vertices that has edges
-		/* Unused since we are using serializable
-		StringBuffer verticeList = new StringBuffer();
-		for (Vertex vertex : vertices) {
-			if (idWithEdge[vertex.id]) {
-				verticeList.append(vertex + "\r\n");
-			}
-		}
-		Files.write((new File("D:\\Downloads\\vertex")).toPath(), verticeList.toString().getBytes(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-		*/
 		
 		//Calculate path using floyd-warshall algorithm
-		//Create the graph with 826 vertices (since we can't use individual ids
+		//Create the graph with all vertices (since we can't use individual ids
 		AdjMatrixEdgeWeightedDigraph graph = new AdjMatrixEdgeWeightedDigraph(maxId);
 		//Add edges
 		for (DirectedEdge edge : edges) {
@@ -205,14 +174,16 @@ public class KMLParser {
 		
 		//Save data for android
 		toJson(fw, "D:\\Downloads\\floydwarshall");
-		//We shall only save vertices with edges
-		LinkedList<Vertex> verticesWithEdges = new LinkedList<Vertex>();
-		for (Vertex vertex : vertices) {
-			if (idWithEdge[vertex.id]) {
-				verticesWithEdges.add(vertex);
+		//We save the vertices
+		//Remove unused vertices first
+		Iterator<Entry<Integer, Vertex>> it = vertices.entrySet().iterator();
+		while (it.hasNext()) {
+			Entry<Integer, Vertex> entry = it.next();
+			if (!entry.getValue().hasEdges) {
+				it.remove();
 			}
 		}
-		toJson(verticesWithEdges, "D:\\Downloads\\vertices");
+		toJson(vertices, "D:\\Downloads\\vertices");
 		
 		/************************************************************
 		 * 															*

@@ -1,9 +1,10 @@
 import java.io.Serializable;
 
-public class Vertex implements Serializable {
+public class Vertex implements Comparable {
 	public int id;
 	public String name;
 	public GeoCoordinate coordinate;
+	public boolean hasEdges;
 	
 	public Vertex(int id, String name, GeoCoordinate coordinate) {
 		super();
@@ -22,5 +23,14 @@ public class Vertex implements Serializable {
 	public String toString() {
 		//return id + " : " + name + " (" + coordinate.latitude + ", " + coordinate.longitude + ")";
 		return id + ";" + name + ";" + coordinate.latitude + ";" + coordinate.longitude;
+	}
+
+	@Override
+	public int compareTo(Object o) {
+		if (o instanceof Vertex) {
+			return this.id - ((Vertex)o).id;
+		} else {
+			return 1;
+		}
 	}
 }
