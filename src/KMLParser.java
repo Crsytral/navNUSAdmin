@@ -179,7 +179,7 @@ public class KMLParser {
 		//FloydWarshallOutput fwo = new FloydWarshallOutput(fw);
 		
 		//Save data for android
-		toJson(fw, "D:\\Downloads\\floydwarshall");
+		toJson(fw, "D:\\Dropbox\\Personal\\Projects\\navNUS\\navNUS\\app\\src\\main\\assets\\floydwarshall");
 		//We save the vertices
 		//Remove unused vertices first
 		Iterator<Entry<Integer, Vertex>> it = vertices.entrySet().iterator();
@@ -189,7 +189,7 @@ public class KMLParser {
 				it.remove();
 			}
 		}
-		toJson(vertices, "D:\\Downloads\\vertices");
+		toJson(vertices, "D:\\Dropbox\\Personal\\Projects\\navNUS\\navNUS\\app\\src\\main\\assets\\vertices");
 		
 		/************************************************************
 		 * 															*
